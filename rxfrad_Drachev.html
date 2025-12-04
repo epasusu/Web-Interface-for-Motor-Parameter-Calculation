@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расчет параметров асинхронного двигателя с фазным ротором</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            padding: 25px 30px;
+        }
+        
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 0;
+        }
+        
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 0;
+        }
+        
+        .input-section {
+            flex: 1;
+            min-width: 300px;
+            padding: 30px;
+            border-right: 1px solid #eee;
+        }
+        
+        .results-section {
+            flex: 1.5;
+            min-width: 400px;
+            padding: 30px;
+            background-color: #f9fafc;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #4a6491;
+            padding-bottom: 8px;
+            margin-top: 0;
+            font-size: 22px;
+        }
+        
+        .input-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            gap: 15px;
+        }
+        
+        .input-field {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        input[type="number"]:focus, input[type="text"]:focus {
+            border-color: #4a6491;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(74, 100, 145, 0.2);
+        }
+        
+        .units {
+            margin-left: 5px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .calculate-btn {
+            background-color: #2c3e50;
+            color: white;
+            flex: 1;
+        }
+        
+        .calculate-btn:hover {
+            background-color: #4a6491;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .reset-btn {
+            background-color: #e74c3c;
+            color: white;
+            flex: 1;
+        }
+        
+        .reset-btn:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .results-container {
+            margin-top: 20px;
+        }
+        
+        .result-category {
+            margin-bottom: 25px;
+        }
+        
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 15px;
+            background-color: white;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            border-left: 4px solid #4a6491;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .result-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .result-value {
+            font-weight: 600;
+            color: #2c3e50;
+            text-align: right;
+        }
+        
+        .result-unit {
+            margin-left: 5px;
+            color: #666;
+        }
+        
+        .highlight {
+            background-color: #e8f4fc;
+            border-left-color: #3498db;
+        }
+        
+        .section-title {
+            color: #2c3e50;
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .copyright {
+            margin-top: 30px;
+            padding: 15px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .input-section {
+                border-right: none;
+                border-bottom: 1px solid #eee;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Расчет параметров асинхронного двигателя с фазным ротором</h1>
+            <p class="subtitle">Расчет активных и реактивных сопротивлений статора и ротора по каталожным данным</p>
+        </header>
+        
+        <div class="content">
+            <div class="input-section">
+                <h2>Исходные данные двигателя</h2>
+                
+                <div class="input-group">
+                    <div class="input-row">
+                        <div class="input-field">
+                            <label for="tip">Тип двигателя <span class="units">(обозначение)</span></label>
+                            <input type="text" id="tip" value="4MTF(H)200L6">
+                        </div>
+                        <div class="input-field">
+                            <label for="pp">Число пар полюсов <span class="units">(ед.)</span></label>
+                            <input type="number" id="pp" value="3" step="1" min="1">
+                        </div>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="input-field">
+                            <label for="u1n">Номинальное фазное напряжение <span class="units">(В)</span></label>
+                            <input type="number" id="u1n" value="220" step="0.1" min="1">
+                        </div>
+                        <div class="input-field">
+                            <label for="f1n">Номинальная частота <span class="units">(Гц)</span></label>
+                            <input type="number" id="f1n" value="50" step="0.1" min="1">
+                        </div>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="input-field">
+                            <label for="Pn">Номинальная мощность <span class="units">(Вт)</span></label>
+                            <input type="number" id="Pn" value="22000" step="100" min="1">
+                        </div>
+                        <div class="input-field">
+                            <label for="nn">Номинальная скорость <span class="units">(об/мин)</span></label>
+                            <input type="number" id="nn" value="935" step="1" min="1">
+                        </div>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="input-field">
+                            <label for="I1n">Номинальный ток статора <span class="units">(А)</span></label>
+                            <input type="number" id="I1n" value="55" step="0.1" min="0.1">
+                        </div>
+                        <div class="input-field">
+                            <label for="kpdn">Номинальный КПД <span class="units">(о.е.)</span></label>
+                            <input type="number" id="kpdn" value="0.83" step="0.01" min="0.1" max="1">
+                        </div>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="input-field">
+                            <label for="cosfi1n">Номинальный cos φ <span class="units">(о.е.)</span></label>
+                            <input type="number" id="cosfi1n" value="0.79" step="0.01" min="0.1" max="1">
+                        </div>
+                        <div class="input-field">
+                            <label for="Mk">Критический момент <span class="units">(Н·м)</span></label>
+                            <input type="number" id="Mk" value="638" step="1" min="1">
+                        </div>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="input-field">
+                            <label for="I2n">Номинальный ток ротора <span class="units">(А)</span></label>
+                            <input type="number" id="I2n" value="60" step="0.1" min="0.1">
+                        </div>
+                        <div class="input-field">
+                            <label for="E20">Напряжение на кольцах ротора <span class="units">(В)</span></label>
+                            <input type="number" id="E20" value="235" step="0.1" min="1">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="buttons">
+                    <button class="calculate-btn" id="calculateBtn">Рассчитать параметры</button>
+                    <button class="reset-btn" id="resetBtn">Сбросить значения</button>
+                </div>
+            </div>
+            
+            <div class="results-section">
+                <h2>Результаты расчета</h2>
+                
+                <div class="results-container">
+                    <div class="section-title">Основные параметры двигателя</div>
+                    
+                    <div class="result-category">
+                        <div class="result-row">
+                            <div class="result-label">Номинальный момент</div>
+                            <div class="result-value"><span id="Mn">-</span> <span class="result-unit">Н·м</span></div>
+                        </div>
+                        
+                        <div class="result-row">
+                            <div class="result-label">Номинальное скольжение</div>
+                            <div class="result-value"><span id="sn">-</span> <span class="result-unit">о.е.</span></div>
+                        </div>
+                        
+                        <div class="result-row">
+                            <div class="result-label">Коэффициент трансформации</div>
+                            <div class="result-value"><span id="ke">-</span> <span class="result-unit">о.е.</span></div>
+                        </div>
+                        
+                        <div class="result-row">
+                            <div class="result-label">Критическое скольжение</div>
+                            <div class="result-value"><span id="sk">-</span> <span class="result-unit">о.е.</span></div>
+                        </div>
+                        
+                        <div class="result-row">
+                            <div class="result-label">Номинальная синхронная скорость</div>
+                            <div class="result-value"><span id="won">-</span> <span class="result-unit">рад/с</span></div>
+                        </div>
+                        
+                        <div class="result-row">
+                            <div class="result-label">Номинальная скорость</div>
+                            <div class="result-value"><span id="wn">-</span> <span class="result-unit">рад/с</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="section-title">Токи и мощности</div>
+                    
+                    <div class="result-category">
+                        <div class="result-row">
+                            <div class="result-label">Приведенный ток ротора (по току)</div>
+                            <div class="result-value"><span id="I2np">-</span> <span class="result-unit">А</span></div>
+                        </div>
+                        
+                        <div class="result-row">
+                            <div class="result-label">Приведенный ток ротора (по мощности)</div>
+                            <div class="result-value"><span id="I2np1">-</span> <span class="result-unit">А</span></div>
+                        </div>
+                        
+                        <div class="result-row">
+                            <div class="result-label">Ток намагничивания</div>
+                            <div class="result-value"><span id="Imn">-</span> <span class="result-unit">А</span></div>
+                        </div>
+                        
+                        <div class="result-row">
+                            <div class="result-label">Потери в роторе</div>
+                            <div class="result-value"><span id="dP2n">-</span> <span class="result-unit">Вт</span></div>
+                        </div>
+                        
+                        <div class="result-row">
+                            <div class="result-label">Электромагнитная мощность</div>
+                            <div class="result-value"><span id="Pemn">-</span> <span class="result-unit">Вт</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="section-title">Расчетные сопротивления</div>
+                    
+                    <div class="result-category">
+                        <div class="result-row highlight">
+                            <div class="result-label">Активное сопротивление статора</div>
+                            <div class="result-value"><span id="r1">-</span> <span class="result-unit">Ом</span></div>
+                        </div>
+                        
+                        <div class="result-row">
+                            <div class="result-label">Активное сопротивление ротора</div>
+                            <div class="result-value"><span id="r2">-</span> <span class="result-unit">Ом</span></div>
+                        </div>
+                        
+                        <div class="result-row highlight">
+                            <div class="result-label">Приведенное сопротивление ротора</div>
+                            <div class="result-value"><span id="r2p">-</span> <span class="result-unit">Ом</span></div>
+                        </div>
+                        
+                        <div class="result-row">
+                            <div class="result-label">Коэффициент a</div>
+                            <div class="result-value"><span id="a">-</span> <span class="result-unit">о.е.</span></div>
+                        </div>
+                        
+                        <div class="result-row">
+                            <div class="result-label">Индуктивное сопротивление рассеяния статора</div>
+                            <div class="result-value"><span id="x1">-</span> <span class="result-unit">Ом</span></div>
+                        </div>
+                        
+                        <div class="result-row">
+                            <div class="result-label">Индуктивное сопротивление рассеяния ротора</div>
+                            <div class="result-value"><span id="x2">-</span> <span class="result-unit">Ом</span></div>
+                        </div>
+                        
+                        <div class="result-row">
+                            <div class="result-label">Приведенное индуктивное сопротивление ротора</div>
+                            <div class="result-value"><span id="x2p">-</span> <span class="result-unit">Ом</span></div>
+                        </div>
+                        
+                        <div class="result-row">
+                            <div class="result-label">Полное индуктивное сопротивление короткого замыкания</div>
+                            <div class="result-value"><span id="xk">-</span> <span class="result-unit">Ом</span></div>
+                        </div>
+                        
+                        <div class="result-row highlight">
+                            <div class="result-label">Индуктивное сопротивление контура намагничивания</div>
+                            <div class="result-value"><span id="xmn">-</span> <span class="result-unit">Ом</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="section-title">Моменты и ЭДС</div>
+                    
+                    <div class="result-category">
+                        <div class="result-row">
+                            <div class="result-label">Номинальный электромагнитный момент</div>
+                            <div class="result-value"><span id="Memn">-</span> <span class="result-unit">Н·м</span></div>
+                        </div>
+                        
+                        <div class="result-row">
+                            <div class="result-label">Потери момента в номинальном режиме</div>
+                            <div class="result-value"><span id="dMxn">-</span> <span class="result-unit">Н·м</span></div>
+                        </div>
+                        
+                        <div class="result-row">
+                            <div class="result-label">Номинальная ЭДС статора</div>
+                            <div class="result-value"><span id="E1n">-</span> <span class="result-unit">В</span></div>
+                        </div>
+                        
+                        <div class="result-row">
+                            <div class="result-label">Отношение E1n/u1n</div>
+                            <div class="result-value"><span id="E1n_ratio">-</span> <span class="result-unit">о.е.</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="copyright">
+                        &copy; Драчев Геннадий Иванович
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Основные константы
+        const PI = 3.1416;
+        
+        // Элементы формы
+        const tipInput = document.getElementById('tip');
+        const ppInput = document.getElementById('pp');
+        const u1nInput = document.getElementById('u1n');
+        const f1nInput = document.getElementById('f1n');
+        const PnInput = document.getElementById('Pn');
+        const nnInput = document.getElementById('nn');
+        const I1nInput = document.getElementById('I1n');
+        const kpdnInput = document.getElementById('kpdn');
+        const cosfi1nInput = document.getElementById('cosfi1n');
+        const MkInput = document.getElementById('Mk');
+        const I2nInput = document.getElementById('I2n');
+        const E20Input = document.getElementById('E20');
+        
+        // Элементы результатов
+        const MnElement = document.getElementById('Mn');
+        const snElement = document.getElementById('sn');
+        const keElement = document.getElementById('ke');
+        const skElement = document.getElementById('sk');
+        const wonElement = document.getElementById('won');
+        const wnElement = document.getElementById('wn');
+        const I2npElement = document.getElementById('I2np');
+        const I2np1Element = document.getElementById('I2np1');
+        const ImnElement = document.getElementById('Imn');
+        const dP2nElement = document.getElementById('dP2n');
+        const PemnElement = document.getElementById('Pemn');
+        const r1Element = document.getElementById('r1');
+        const r2Element = document.getElementById('r2');
+        const r2pElement = document.getElementById('r2p');
+        const aElement = document.getElementById('a');
+        const x1Element = document.getElementById('x1');
+        const x2Element = document.getElementById('x2');
+        const x2pElement = document.getElementById('x2p');
+        const xkElement = document.getElementById('xk');
+        const xmnElement = document.getElementById('xmn');
+        const MemnElement = document.getElementById('Memn');
+        const dMxnElement = document.getElementById('dMxn');
+        const E1nElement = document.getElementById('E1n');
+        const E1nRatioElement = document.getElementById('E1n_ratio');
+        
+        // Кнопки
+        const calculateBtn = document.getElementById('calculateBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        
+        // Функция для форматирования чисел
+        function formatNumber(num, decimals = 4) {
+            if (isNaN(num) || !isFinite(num)) return '-';
+            return num.toFixed(decimals);
+        }
+        
+        // Основная функция расчета
+        function calculateParameters() {
+            // Получение значений из формы
+            const tip = tipInput.value;
+            const pp = parseFloat(ppInput.value);
+            const u1n = parseFloat(u1nInput.value);
+            const f1n = parseFloat(f1nInput.value);
+            const Pn = parseFloat(PnInput.value);
+            const nn = parseFloat(nnInput.value);
+            const I1n = parseFloat(I1nInput.value);
+            const kpdn = parseFloat(kpdnInput.value);
+            const cosfi1n = parseFloat(cosfi1nInput.value);
+            const Mk = parseFloat(MkInput.value);
+            const I2n = parseFloat(I2nInput.value);
+            const E20 = parseFloat(E20Input.value);
+            
+            // Проверка введенных данных
+            if ([pp, u1n, f1n, Pn, nn, I1n, kpdn, cosfi1n, Mk, I2n, E20].some(isNaN)) {
+                alert('Пожалуйста, введите корректные числовые значения во все поля');
+                return;
+            }
+            
+            // 1. Расчетные данные двигателя
+            const won = 2 * PI * f1n / pp; // Номинальная синхронная скорость, рад/с
+            const wn = nn / 9.55;          // Номинальная скорость, рад/с
+            const Mn = Pn / wn;            // Номинальный момент, Нм
+            const sn = (won - wn) / won;   // Номинальное скольжение
+            const Mko = Mk / Mn;           // Критический момент, о.е.
+            
+            // 2. Коэффициент трансформации
+            const ke = 0.95 * u1n / (E20 / 1.73);
+            
+            // 3. Приведенный ток ротора
+            const I2np = I2n / ke;
+            const I2np1 = I1n * cosfi1n;
+            
+            // 4. Активное сопротивление ротора
+            const r2 = E20 * sn / (1.73 * I2n);
+            
+            // 5. Приведенное среднее сопротивление ротора
+            const r2p = r2 * Math.pow(ke, 2);
+            
+            // 6. Потери в роторе
+            const dP2n = 3 * Math.pow(I2np, 2) * r2p;
+            
+            // 7. Электромагнитная мощность номинальная
+            const Pemn = dP2n / sn;
+            
+            // 8. Номинальный электромагнитный момент
+            const Memn = Pemn / won;
+            
+            // 9. Активное сопротивление статора r1
+            const a1 = 1;
+            
+            // Расчет критического скольжения sk (по формуле из MATLAB-скрипта)
+            const skNumerator = Mko + Math.sqrt(Math.pow(Mko, 2) - 1 + 2 * a1 * sn * (Mko - 1));
+            const skDenominator = 1 - 2 * sn * a1 * (Mko - 1);
+            const sk = sn * (skNumerator / skDenominator);
+            
+            // Расчет коэффициента a
+            const a = (Memn * (sn / sk + sk / sn) - 2 * Mk) / (2 * sk * (Mk - Memn));
+            
+            // Активное сопротивление статора r1
+            const r1 = r2p * a;
+            
+            // 10. Индуктивные сопротивления рассеяния статора и приведенного ротора
+            const xk = r2p * Math.sqrt(1 - Math.pow(a * sk, 2)) / sk;
+            const x1 = xk / 2;
+            const x2p = xk / 2;
+            const x2 = x2p / Math.pow(ke, 2);
+            
+            // 11. Ток намагничивания в номинальной точке по формуле В.А. Шубенко
+            const sinfi1n = Math.sqrt(1 - Math.pow(cosfi1n, 2));
+            const Imn = I1n * (sinfi1n - cosfi1n * sn / sk);
+            
+            // 12. Индуктивное сопротивление контура намагничивания
+            const xmn = u1n / Imn - x1;
+            
+            // 13. Номинальная ЭДС статора
+            const E1n = Imn * xmn;
+            
+            // 14. Потери момента в номинальном режиме, Нм
+            const dMxn = Memn - Mn;
+            
+            // 15. Отношение E1n/u1n
+            const E1n_ratio = E1n / u1n;
+            
+            // Вывод результатов
+            MnElement.textContent = formatNumber(Mn, 2);
+            snElement.textContent = formatNumber(sn);
+            keElement.textContent = formatNumber(ke, 4);
+            skElement.textContent = formatNumber(sk);
+            wonElement.textContent = formatNumber(won, 2);
+            wnElement.textContent = formatNumber(wn, 2);
+            I2npElement.textContent = formatNumber(I2np, 2);
+            I2np1Element.textContent = formatNumber(I2np1, 2);
+            ImnElement.textContent = formatNumber(Imn, 2);
+            dP2nElement.textContent = formatNumber(dP2n, 2);
+            PemnElement.textContent = formatNumber(Pemn, 2);
+            r1Element.textContent = formatNumber(r1);
+            r2Element.textContent = formatNumber(r2);
+            r2pElement.textContent = formatNumber(r2p);
+            aElement.textContent = formatNumber(a);
+            x1Element.textContent = formatNumber(x1);
+            x2Element.textContent = formatNumber(x2);
+            x2pElement.textContent = formatNumber(x2p);
+            xkElement.textContent = formatNumber(xk);
+            xmnElement.textContent = formatNumber(xmn, 2);
+            MemnElement.textContent = formatNumber(Memn, 2);
+            dMxnElement.textContent = formatNumber(dMxn, 2);
+            E1nElement.textContent = formatNumber(E1n, 2);
+            E1nRatioElement.textContent = formatNumber(E1n_ratio, 4);
+            
+            console.log('Расчет завершен успешно');
+            console.log('Тип двигателя:', tip);
+            console.log('r1 =', r1, 'Ом');
+            console.log('r2 =', r2, 'Ом');
+            console.log('r2p =', r2p, 'Ом');
+            console.log('x1 =', x1, 'Ом');
+            console.log('x2 =', x2, 'Ом');
+            console.log('xmn =', xmn, 'Ом');
+            console.log('ke =', ke);
+        }
+        
+        // Функция сброса значений к исходным
+        function resetValues() {
+            tipInput.value = "4MTF(H)200L6";
+            ppInput.value = 3;
+            u1nInput.value = 220;
+            f1nInput.value = 50;
+            PnInput.value = 22000;
+            nnInput.value = 935;
+            I1nInput.value = 55;
+            kpdnInput.value = 0.83;
+            cosfi1nInput.value = 0.79;
+            MkInput.value = 638;
+            I2nInput.value = 60;
+            E20Input.value = 235;
+            
+            // Сброс результатов
+            const resultElements = [
+                MnElement, snElement, keElement, skElement, wonElement, wnElement,
+                I2npElement, I2np1Element, ImnElement, dP2nElement, PemnElement,
+                r1Element, r2Element, r2pElement, aElement, x1Element, x2Element,
+                x2pElement, xkElement, xmnElement, MemnElement, dMxnElement,
+                E1nElement, E1nRatioElement
+            ];
+            
+            resultElements.forEach(el => {
+                el.textContent = '-';
+            });
+            
+            console.log('Значения сброшены к исходным');
+        }
+        
+        // Обработчики событий
+        calculateBtn.addEventListener('click', calculateParameters);
+        resetBtn.addEventListener('click', resetValues);
+        
+        // Автоматический расчет при загрузке страницы
+        window.addEventListener('DOMContentLoaded', () => {
+            // Можно включить автоматический расчет при загрузке
+            // calculateParameters();
+            console.log('Веб-приложение для расчета параметров АД с фазным ротором загружено');
+        });
+    </script>
+</body>
+</html>

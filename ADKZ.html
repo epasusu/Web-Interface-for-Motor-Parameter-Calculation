@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Расчет характеристик АДКЗ</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 20px;
+        }
+        
+        h1 { 
+            text-align: center; 
+            color: #2c3e50; 
+            margin-bottom: 30px;
+        }
+        
+        h2, h3 { 
+            color: #34495e; 
+            margin-top: 25px;
+        }
+        
+        .input-group { 
+            margin-bottom: 15px; 
+            padding: 10px; 
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+        
+        label { 
+            display: inline-block; 
+            width: 300px; 
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        input, select { 
+            width: 300px; 
+            padding: 8px; 
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        button { 
+            padding: 12px 30px; 
+            margin: 20px 0; 
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover { 
+            background-color: #2980b9; 
+        }
+        
+        .chart-container { 
+            width: 100%; 
+            height: 500px; 
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .results { 
+            margin-top: 30px; 
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .result-item {
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+            border-left: 4px solid #2ecc71;
+        }
+        
+        .result-label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .result-value {
+            color: #e74c3c;
+            font-size: 18px;
+            margin-top: 5px;
+        }
+        
+        .section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .highlight {
+            background-color: #fff8dc;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #f1c40f;
+        }
+        
+        @media (max-width: 768px) {
+            label { 
+                width: 100%; 
+                display: block;
+            }
+            
+            input, select { 
+                width: 100%; 
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Расчет механических и энергетических характеристик АДКЗ</h1>
+    
+    <div class="section">
+        <h2>Ввод данных двигателя</h2>
+        
+        <div class="highlight">
+            <strong>Примечание:</strong> Введите каталожные и обмоточные данные двигателя для расчета характеристик
+        </div>
+        
+        <div class="input-group">
+            <label>Тип двигателя:</label>
+            <input type="text" id="tip" value="4MTKF(H)200L6">
+        </div>
+        
+        <div class="input-group">
+            <label>Число пар полюсов (pp):</label>
+            <input type="number" id="pp" value="3" step="1">
+        </div>
+        
+        <div class="input-group">
+            <label>Ном. фазное напряжение, В (u1n):</label>
+            <input type="number" id="u1n" value="220">
+        </div>
+        
+        <div class="input-group">
+            <label>Ном. частота, Гц (f1n):</label>
+            <input type="number" id="f1n" value="50">
+        </div>
+        
+        <div class="input-group">
+            <label>Ном. мощность, Вт (Pn):</label>
+            <input type="number" id="Pn" value="22000">
+        </div>
+        
+        <div class="input-group">
+            <label>Ном. скорость, об/мин (nn):</label>
+            <input type="number" id="nn" value="935">
+        </div>
+        
+        <div class="input-group">
+            <label>Ном. ток статора, А (I1n):</label>
+            <input type="number" id="I1n" value="51">
+        </div>
+        
+        <div class="input-group">
+            <label>Ном. КПД (kpdn):</label>
+            <input type="number" id="kpdn" value="0.83" step="0.01">
+        </div>
+        
+        <div class="input-group">
+            <label>Ном. cos φ (cosfi1n):</label>
+            <input type="number" id="cosfi1n" value="0.79" step="0.01">
+        </div>
+        
+        <div class="input-group">
+            <label>Крит. момент, Нм (Mk):</label>
+            <input type="number" id="Mk" value="760">
+        </div>
+        
+        <div class="input-group">
+            <label>Пусковой момент, Нм (Mp):</label>
+            <input type="number" id="Mp" value="706">
+        </div>
+        
+        <div class="input-group">
+            <label>Пусковой ток, А (I1p):</label>
+            <input type="number" id="I1p" value="275">
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Обмоточные данные</h2>
+        
+        <div class="input-group">
+            <label>R1, Ом (r1):</label>
+            <input type="number" id="r1" value="0.232" step="0.001">
+        </div>
+        
+        <div class="input-group">
+            <label>R2', Ом (r2p):</label>
+            <input type="number" id="r2p" value="0.325" step="0.001">
+        </div>
+        
+        <div class="input-group">
+            <label>X1, Ом (x1):</label>
+            <input type="number" id="x1" value="0.285" step="0.001">
+        </div>
+        
+        <div class="input-group">
+            <label>X2', Ом (x2p):</label>
+            <input type="number" id="x2p" value="0.2844" step="0.001">
+        </div>
+        
+        <div class="input-group">
+            <label>Ток намагничивания, А (Imn):</label>
+            <input type="number" id="Imn" value="26.3" step="0.1">
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Параметры источника питания</h2>
+        
+        <div class="input-group">
+            <label>Тип источника:</label>
+            <select id="sourceType">
+                <option value="1">Источник напряжения (in=1)</option>
+                <option value="2">Источник тока (it=1)</option>
+                <option value="3">Динамическое торможение (dt=1)</option>
+            </select>
+        </div>
+        
+        <div class="input-group" id="u1s-group">
+            <label>Фазное напряжение, В (u1s):</label>
+            <input type="number" id="u1s" value="220">
+        </div>
+        
+        <div class="input-group">
+            <label>Частота, Гц (f1):</label>
+            <input type="number" id="f1" value="50">
+        </div>
+        
+        <div class="input-group" id="i1s-group" style="display:none;">
+            <label>Ток статора, А (i1s):</label>
+            <input type="number" id="i1s" value="55">
+        </div>
+        
+        <div class="input-group" id="Ipost-group" style="display:none;">
+            <label>Постоянный ток, А (Ipost):</label>
+            <input type="number" id="Ipost" value="100">
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Параметры расчета характеристик</h2>
+        
+        <div class="input-group">
+            <label>Начальная скорость, рад/с (wna):</label>
+            <input type="number" id="wna" value="-10">
+        </div>
+        
+        <div class="input-group">
+            <label>Конечная скорость, рад/с (wko):</label>
+            <input type="number" id="wko" value="110">
+        </div>
+        
+        <div class="input-group">
+            <label>Шаг скорости, рад/с (dw):</label>
+            <input type="number" id="dw" value="0.5" step="0.1">
+        </div>
+    </div>
+    
+    <div style="text-align: center;">
+        <button onclick="calculate()">Рассчитать характеристики</button>
+    </div>
+    
+    <div id="resultsSection" style="display: none;">
+        <div class="section">
+            <h2>Графики характеристик</h2>
+            <div class="chart-container">
+                <canvas id="characteristicsChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="results">
+            <h2>Результаты расчета</h2>
+            
+            <div id="calculatedValues">
+                <h3>Основные параметры двигателя</h3>
+                <div class="results-grid" id="basicParams"></div>
+                
+                <h3 style="margin-top: 30px;">Характеристики в ключевых точках</h3>
+                <div class="results-grid" id="keyPoints"></div>
+                
+                <h3 style="margin-top: 30px;">Энергетические показатели</h3>
+                <div class="results-grid" id="energyParams"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Комплексное число
+        class Complex {
+            constructor(re, im) {
+                this.re = re;
+                this.im = im;
+            }
+
+            static add(a, b) {
+                return new Complex(a.re + b.re, a.im + b.im);
+            }
+
+            static subtract(a, b) {
+                return new Complex(a.re - b.re, a.im - b.im);
+            }
+
+            static multiply(a, b) {
+                return new Complex(
+                    a.re * b.re - a.im * b.im,
+                    a.re * b.im + a.im * b.re
+                );
+            }
+
+            static divide(a, b) {
+                const denom = b.re * b.re + b.im * b.im;
+                return new Complex(
+                    (a.re * b.re + a.im * b.im) / denom,
+                    (a.im * b.re - a.re * b.im) / denom
+                );
+            }
+
+            abs() {
+                return Math.sqrt(this.re * this.re + this.im * this.im);
+            }
+
+            angle() {
+                return Math.atan2(this.im, this.re);
+            }
+        }
+
+        let chart = null;
+
+        // Управление видимостью полей ввода
+        document.getElementById('sourceType').addEventListener('change', function() {
+            const sourceType = this.value;
+            document.getElementById('u1s-group').style.display = sourceType === '1' ? 'block' : 'none';
+            document.getElementById('i1s-group').style.display = sourceType === '2' ? 'block' : 'none';
+            document.getElementById('Ipost-group').style.display = sourceType === '3' ? 'block' : 'none';
+        });
+
+        function calculate() {
+            // Получение данных из формы
+            const params = {
+                tip: document.getElementById('tip').value,
+                pp: parseFloat(document.getElementById('pp').value),
+                u1n: parseFloat(document.getElementById('u1n').value),
+                f1n: parseFloat(document.getElementById('f1n').value),
+                Pn: parseFloat(document.getElementById('Pn').value),
+                nn: parseFloat(document.getElementById('nn').value),
+                I1n: parseFloat(document.getElementById('I1n').value),
+                kpdn: parseFloat(document.getElementById('kpdn').value),
+                cosfi1n: parseFloat(document.getElementById('cosfi1n').value),
+                Mk: parseFloat(document.getElementById('Mk').value),
+                Mp: parseFloat(document.getElementById('Mp').value),
+                I1p: parseFloat(document.getElementById('I1p').value),
+                r1: parseFloat(document.getElementById('r1').value),
+                r2p: parseFloat(document.getElementById('r2p').value),
+                x1: parseFloat(document.getElementById('x1').value),
+                x2p: parseFloat(document.getElementById('x2p').value),
+                Imn: parseFloat(document.getElementById('Imn').value),
+                sourceType: document.getElementById('sourceType').value,
+                u1s: parseFloat(document.getElementById('u1s').value),
+                f1: parseFloat(document.getElementById('f1').value),
+                i1s: parseFloat(document.getElementById('i1s').value),
+                Ipost: parseFloat(document.getElementById('Ipost').value),
+                wna: parseFloat(document.getElementById('wna').value),
+                wko: parseFloat(document.getElementById('wko').value),
+                dw: parseFloat(document.getElementById('dw').value)
+            };
+
+            // Константы
+            const pi = 3.1416;
+            
+            // Расчет номинальных значений
+            const won = 2 * pi * params.f1n / params.pp; // Ном. синхронная скорость
+            const wn = params.nn / 9.55; // Ном. скорость
+            const Mn = params.Pn / wn; // Ном. момент
+            const sn = (won - wn) / won; // Ном. скольжение
+            const Mko = params.Mk / Mn; // Крит. момент в о.е.
+            const Mpo = params.Mp / Mn; // Пуск. момент в о.е.
+            const I1po = params.I1p / params.I1n; // Пуск. ток в о.е.
+            const a1 = params.r1 / params.r2p;
+            
+            // Расчет критического скольжения
+            const sk = sn * (Mko + Math.sqrt((Mko**2 - 1) + 2 * a1 * sn * (Mko - 1))) / 
+                      (1 - 2 * sn * a1 * (Mko - 1));
+            
+            // Ток намагничивания
+            let Imn = params.Imn;
+            if (Imn === 0) {
+                const sinfi1n = Math.sqrt(1 - params.cosfi1n**2);
+                Imn = params.I1n * (sinfi1n - params.cosfi1n * sn / sk);
+            }
+            
+            const xmn = params.u1n / Imn - params.x1; // Индуктивное сопротивление намагничивания
+            const E1n = Imn * xmn; // Ном. ЭДС статора
+            
+            // Расчет электромагнитного момента
+            const Memn = 2 * params.Mk * (1 + a1 * sk) / (sn / sk + sk / sn + 2 * a1 * sk);
+            const dMxn = Memn - Mn; // Потери момента
+            const r2v = params.Mp * won / (3 * params.I1p**2); // Активное сопротивление ротора
+
+            // Подготовка данных для графиков
+            const speeds = [];
+            const moments = [];
+            const currents = [];
+            const rotorCurrents = [];
+            const magnetCurrents = [];
+            const efficiencies = [];
+            const powerFactors = [];
+            const powerShaft = [];
+            
+            // Массивы для хранения всех расчетных значений
+            const results = [];
+
+            // Расчет точек
+            for (let w = params.wna; w <= params.wko; w += params.dw) {
+                speeds.push(w);
+                
+                // Определение параметров источника
+                let inSource = false, itSource = false, dtSource = false;
+                let u1 = 0, i1 = 0, f1 = params.f1;
+                
+                switch(params.sourceType) {
+                    case '1': // Источник напряжения
+                        inSource = true;
+                        u1 = params.u1s;
+                        break;
+                    case '2': // Источник тока
+                        itSource = true;
+                        i1 = params.i1s;
+                        f1 = params.f1;
+                        break;
+                    case '3': // Динамическое торможение
+                        dtSource = true;
+                        i1 = 0.816 * params.Ipost;
+                        f1 = 0;
+                        break;
+                }
+
+                let s, wo;
+                if (dtSource) {
+                    s = -w / won;
+                    wo = won;
+                } else {
+                    const a = (f1 + 0) / params.f1n; // ks = 0
+                    wo = a * won;
+                    s = (wo - w) / wo;
+                }
+
+                if (Math.abs(s) < 0.001) s = 0.001;
+
+                // Параметры схемы замещения
+                const a = (f1 + 0) / params.f1n;
+                const r2s = r2v / s;
+                const z2p = new Complex(r2s, params.x2p * a);
+                const zm = new Complex(0, xmn * a);
+                const zmr = Complex.divide(Complex.multiply(zm, z2p), Complex.add(zm, z2p));
+                const z1 = new Complex(params.r1, params.x1 * a);
+                const zc = Complex.add(z1, zmr);
+
+                let I1, I2p, Im, M, cosfi, Pv, kpd, Pc, Pem;
+
+                if (dtSource) {
+                    const i1c = new Complex(i1, 0);
+                    const i2p = Complex.divide(Complex.multiply(i1c, zm), Complex.add(z2p, zm));
+                    const im = Complex.divide(Complex.multiply(i1c, z2p), Complex.add(z2p, zm));
+                    
+                    I2p = i2p.abs();
+                    Im = im.abs();
+                    I1 = i1;
+                    M = 3 * I2p**2 * r2s / wo;
+                    cosfi = 0;
+                    Pv = (M - 0) * w; // dMx = 0 для упрощения
+                    kpd = 0;
+                    Pc = 0;
+                    Pem = M * w + 3 * I2p**2 * params.r2p;
+                } else {
+                    let u1c, i1c;
+                    if (itSource) {
+                        i1c = new Complex(i1, 0);
+                        u1c = Complex.multiply(i1c, zc);
+                    } else {
+                        u1c = new Complex(u1, 0);
+                        i1c = Complex.divide(u1c, zc);
+                    }
+                    
+                    const e = Complex.multiply(i1c, zmr);
+                    const im = Complex.divide(e, zm);
+                    const i2p = Complex.divide(Complex.multiply(new Complex(-1, 0), e), z2p);
+                    
+                    I1 = i1c.abs();
+                    I2p = i2p.abs();
+                    Im = im.abs();
+                    
+                    M = 3 * I2p**2 * r2s / wo;
+                    cosfi = Math.abs(Math.cos(zc.angle()));
+                    const dMx = Math.abs(dMxn) * Math.sign(w);
+                    Pv = (M - dMx) * w;
+                    Pc = 3 * u1c.abs() * i1c.re;
+                    Pem = M * w + 3 * I2p**2 * params.r2p;
+                    kpd = Pv / Pc;
+                    
+                    if (kpd <= 0 || kpd > 1 || isNaN(kpd)) kpd = 0;
+                }
+
+                moments.push(M / Mn);
+                currents.push(I1 / params.I1n);
+                rotorCurrents.push(I2p / params.I1n);
+                magnetCurrents.push(Im / params.I1n);
+                efficiencies.push(kpd);
+                powerFactors.push(cosfi);
+                powerShaft.push(Pv);
+                
+                // Сохраняем последние результаты для вывода
+                if (Math.abs(w - wn) < params.dw) {
+                    results.nominal = { w, M, I1, I2p, Im, cosfi, kpd, Pv, Pc, Pem };
+                }
+                
+                if (Math.abs(w - 0) < params.dw) {
+                    results.starting = { w, M, I1, I2p, Im, cosfi, kpd, Pv, Pc, Pem };
+                }
+                
+                if (Math.abs(w - won*(1-sk)) < params.dw) {
+                    results.critical = { w, M, I1, I2p, Im, cosfi, kpd, Pv, Pc, Pem };
+                }
+            }
+
+            // Показываем секцию результатов
+            document.getElementById('resultsSection').style.display = 'block';
+            
+            // Отображение графика
+            const ctx = document.getElementById('characteristicsChart').getContext('2d');
+            
+            if (chart) {
+                chart.destroy();
+            }
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: speeds.map(w => w.toFixed(1)),
+                    datasets: [
+                        {
+                            label: 'Момент (M/Mn)',
+                            data: moments,
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            borderWidth: 2,
+                            yAxisID: 'y',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Ток статора (I1/I1n)',
+                            data: currents,
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            borderWidth: 2,
+                            yAxisID: 'y1',
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Механическая и токовая характеристики АДКЗ'
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Скорость, рад/с'
+                            },
+                            grid: {
+                                color: 'rgba(0,0,0,0.05)'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Момент (M/Mn)'
+                            },
+                            min: -2,
+                            max: 3,
+                            grid: {
+                                color: 'rgba(0,0,0,0.05)'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Ток (I1/I1n)'
+                            },
+                            min: -1,
+                            max: 6,
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Вывод расчетных значений
+            let basicParamsHTML = '';
+            basicParamsHTML += `
+                <div class="result-item">
+                    <div class="result-label">Номинальная скорость</div>
+                    <div class="result-value">${wn.toFixed(2)} рад/с</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">Синхронная скорость</div>
+                    <div class="result-value">${won.toFixed(2)} рад/с</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">Номинальный момент</div>
+                    <div class="result-value">${Mn.toFixed(2)} Нм</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">Номинальное скольжение</div>
+                    <div class="result-value">${sn.toFixed(4)}</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">Критическое скольжение</div>
+                    <div class="result-value">${sk.toFixed(4)}</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">Кратность критического момента</div>
+                    <div class="result-value">${Mko.toFixed(2)}</div>
+                </div>
+            `;
+            
+            document.getElementById('basicParams').innerHTML = basicParamsHTML;
+            
+            // Ключевые точки
+            let keyPointsHTML = '';
+            if (results.starting) {
+                keyPointsHTML += `
+                    <div class="result-item">
+                        <div class="result-label">Пусковой момент</div>
+                        <div class="result-value">${results.starting.M.toFixed(2)} Нм</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Пусковой ток</div>
+                        <div class="result-value">${results.starting.I1.toFixed(2)} А</div>
+                    </div>
+                `;
+            }
+            
+            if (results.critical) {
+                keyPointsHTML += `
+                    <div class="result-item">
+                        <div class="result-label">Критический момент</div>
+                        <div class="result-value">${results.critical.M.toFixed(2)} Нм</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Скорость при Mкр</div>
+                        <div class="result-value">${results.critical.w.toFixed(2)} рад/с</div>
+                    </div>
+                `;
+            }
+            
+            if (results.nominal) {
+                keyPointsHTML += `
+                    <div class="result-item">
+                        <div class="result-label">Момент номинальный</div>
+                        <div class="result-value">${results.nominal.M.toFixed(2)} Нм</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Ток номинальный</div>
+                        <div class="result-value">${results.nominal.I1.toFixed(2)} А</div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('keyPoints').innerHTML = keyPointsHTML;
+            
+            // Энергетические показатели
+            let energyHTML = '';
+            if (results.nominal) {
+                energyHTML += `
+                    <div class="result-item">
+                        <div class="result-label">КПД в ном. режиме</div>
+                        <div class="result-value">${(results.nominal.kpd*100).toFixed(1)} %</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">cos φ в ном. режиме</div>
+                        <div class="result-value">${results.nominal.cosfi.toFixed(3)}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Мощность на валу</div>
+                        <div class="result-value">${(results.nominal.Pv/1000).toFixed(2)} кВт</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Потребляемая мощность</div>
+                        <div class="result-value">${(results.nominal.Pc/1000).toFixed(2)} кВт</div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('energyParams').innerHTML = energyHTML;
+            
+            // Прокрутка к результатам
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            // Устанавливаем обработчик изменения типа источника
+            document.getElementById('sourceType').dispatchEvent(new Event('change'));
+        });
+    </script>
+</body>
+</html>
