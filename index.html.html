@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расчеты асинхронных двигателей</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            border-bottom: 3px solid #3498db;
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+            margin-top: 10px;
+        }
+        
+        .links-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+        }
+        
+        .link-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .link-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        
+        .link-card:nth-child(1) {
+            border-top: 5px solid #e74c3c;
+        }
+        
+        .link-card:nth-child(2) {
+            border-top: 5px solid #3498db;
+        }
+        
+        .link-card:nth-child(3) {
+            border-top: 5px solid #2ecc71;
+        }
+        
+        .link-card:nth-child(4) {
+            border-top: 5px solid #f39c12;
+        }
+        
+        .link-title {
+            font-size: 1.6rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .link-description {
+            color: #5d6d7e;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            flex-grow: 1;
+        }
+        
+        .link-button {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 14px 25px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+        }
+        
+        .link-button:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+        
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            padding: 20px;
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .links-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Расчеты асинхронных двигателей</h1>
+            <p class="subtitle">Программы для расчета статических, энергетических характеристик и сопротивлений обмоток</p>
+        </header>
+        
+        <main class="links-container">
+            <div class="link-card">
+                <h2 class="link-title">Расчет статических и энергетических характеристик АД с короткозамкнутым ротором</h2>
+                <p class="link-description">Программа для расчета рабочих характеристик асинхронного двигателя с короткозамкнутым ротором: КПД, коэффициент мощности, скольжение, момент и другие параметры в зависимости от нагрузки.</p>
+                <a href="ADKZ.html" class="link-button">Открыть расчет</a>
+            </div>
+            
+            <div class="link-card">
+                <h2 class="link-title">Расчет статических и энергетических характеристик АД с фазным ротором</h2>
+                <p class="link-description">Программа для расчета рабочих характеристик асинхронного двигателя с фазным ротором. Учитывает особенности конструкции, позволяет анализировать энергетические показатели и статические характеристики.</p>
+                <a href="ADFR.html" class="link-button">Открыть расчет</a>
+            </div>
+            
+            <div class="link-card">
+                <h2 class="link-title">Расчет сопротивлений обмоток АД с короткозамкнутым ротором</h2>
+                <p class="link-description">Программа для определения активных и индуктивных сопротивлений обмоток асинхронного двигателя с короткозамкнутым ротором по методике Драчева.</p>
+                <a href="rxkzad_Drachev.html" class="link-button">Открыть расчет</a>
+            </div>
+            
+            <div class="link-card">
+                <h2 class="link-title">Расчет сопротивлений обмоток АД с фазным ротором</h2>
+                <p class="link-description">Программа для расчета параметров сопротивлений обмоток асинхронного двигателя с фазным ротором по методике Драчева.</p>
+                <a href="rxfrad_Drachev.html" class="link-button">Открыть расчет</a>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Все программы находятся в одном каталоге main на GitHub</p>
+            <p>Для работы необходимы файлы: ADKZ.html, ADFR.html, rxkzad_Drachev.html, rxfrad_Drachev.html</p>
+        </footer>
+    </div>
+</body>
+</html>
